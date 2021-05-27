@@ -27,7 +27,7 @@ int main (int argc, char **argv)
         if(ot)
         {
             std::cout<<"Map received..."<<endl;
-            for(OcTree::leaf_iterator it = ot->begin_leafs(),end = ot->end_leafs(); it!= end; ++it)
+            for(OcTree::tree_iterator it = ot->begin_tree(),end = ot->end_tree(); it!= end; ++it)
             {
                 if(ot->isNodeOccupied(*it))
                 {
@@ -35,7 +35,10 @@ int main (int argc, char **argv)
                     std::cout<<" y = "<< it.getY()<<endl;
                     std::cout<<" z = "<< it.getZ()<<endl;
                     std::cout<<"---------------------------------------"<<endl;
+                    std::cout<<"Occupancy probability of node: "<<it->getOccupancy()<<endl;
                     occupied++;
+                    
+                    
                 }
                 else
                 {
@@ -46,6 +49,9 @@ int main (int argc, char **argv)
             }
             std::cout<<"Number of occupied cells = "<<occupied<<endl;
             std::cout<<"Number of Free cells: "<<free<<endl;
+            std::cout<<"Number of Nodes in Tree "<<ot->size()<<endl;
+            std::cout<<"pointer of node (cordinates: 2.025,0.775,0.025): "<<ot->search(2.025,0.775,0.025)<<endl;
+            
         }
     }
     delete tree;
