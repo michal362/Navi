@@ -17,39 +17,37 @@ using namespace octomap_msgs;
 
 int main (int argc, char **argv)
 {
-    string btFilename = "my_octomap.bt";
-    ros::init(argc,argv,"octo_sub_dane");
-    ros::NodeHandle k;
-    ros::Publisher chatter_pub = k.advertise<std_msgs::String>("chatter",1000);
-
-    ros::Rate loop_rate(10);
-
-    OcTree* tree = new OcTree(btFilename);
-    int count = 0;
-
-    while (ros::ok())
+    string filename = "mapafile.ot";
+    int occupied = 0;
+    int free = 0;
+    AbstractOcTree* tree = AbstractOcTree::read(filename);
+    if(tree)
     {
-        std_msgs::String msg;
-        std::stringstream ss;
-
-        ss<<"hello world"<< count;
-        msg.data = ss.str();
-
-        ROS_INFO("%s", msg.data.c_str());
-
-        chatter_pub.publish(msg);
-        ros::spinOnce();
-        loop_rate.sleep();
-        ++count;
-
-        for(OcTree::leaf_iterator it = tree->begin_leafs(),end = tree->end_leafs(); it!= end; ++it)
+        OcTree* ot = dynamic_cast<OcTree*>(tree);
+        if(ot)
         {
-            cout<<"Node center: "<<it.getCoordinate();
-            cout<<" Value: "<<it->getValue()<<"\n";
+            std::cout<<"Map received..."<<endl;
+            for(OcTree::leaf_iterator it = ot->begin_leafs(),end = ot->end_leafs(); it!= end; ++it)
+            {
+                if(ot->isNodeOccupied(*it))
+                {
+                    std::cout<<" x = "<< it.getX()<<endl;
+                    std::cout<<" y = "<< it.getY()<<endl;
+                    std::cout<<" z = "<< it.getZ()<<endl;
+                    std::cout<<"---------------------------------------"<<endl;
+                    occupied++;
+                }
+                else
+                {
+                    free++;
+                }
+
+                
+            }
+            std::cout<<"Number of occupied cells = "<<occupied<<endl;
+            std::cout<<"Number of Free cells: "<<free<<endl;
         }
-
-
     }
-
+    delete tree;
     return 0;
 }
