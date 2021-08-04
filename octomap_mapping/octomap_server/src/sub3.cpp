@@ -17,24 +17,28 @@ using namespace octomap_msgs;
 
 double global_x;
 double global_y;
-
-void ChatterCallback(const octomap_msgs::Octomap &msg)
+int occupied = 0;
+class Mapa
 {
-    int occupied = 0;
+    public:
+
+        void ChatterCallback(const octomap_msgs::Octomap &msg);
+};
+void Mapa::ChatterCallback(const octomap_msgs::Octomap &msg)
+{
+    //int occupied = 0;
     int free = 0;
     int unknown = 0;
     int flaga = 0;
     bool check = true;
     point3d min;
     point3d max;
-    //min.x() = 0;min.y() = 1;min.z() = 0.025;
-    //max.x() = 1;max.y() = 2;max.z() = 0.026;
-    AbstractOcTree* tree = octomap_msgs::msgToMap(msg); 
+    AbstractOcTree* tree = octomap_msgs::msgToMap(msg);
 
-    
     if(tree)
     {
        OcTree* octree = dynamic_cast<OcTree*>(tree);
+
        if(octree)
        {
            std::cout<<"Map received..."<<endl;
@@ -78,6 +82,7 @@ void ChatterCallback(const octomap_msgs::Octomap &msg)
                     {
                         global_x = i_x;
                         global_y = i_y;
+                        
                     }
                     check = false;
 
@@ -112,18 +117,24 @@ void ChatterCallback(const octomap_msgs::Octomap &msg)
     delete tree;
 }
 
+
+
 int main (int argc, char **argv)
 {
-
-    ros::init(argc,argv, "sub2");
+    Mapa map;
+    ros::init(argc,argv, "sub3");
     ros::NodeHandle n,nh;
-    ros::Subscriber sub = n.subscribe("/octomap_binary",1000,ChatterCallback);
-    ros::Publisher pub_goal = nh.advertise<geometry_msgs::Point>("goal_xyz",100);
+    ros::Subscriber sub = n.subscribe("/octomap_binary",1000,&Mapa::ChatterCallback,&map);
+    ros::Publisher pub_goal = nh.advertise<geometry_msgs::Point>("goal_xyz",1000);
     geometry_msgs::Point msg;
-    msg.x = 5;
-    msg.y = 5;
-    msg.z = 5;
-    pub_goal.publish(msg);
-    ros::spin();
+    while (ros::ok())
+    {
+        msg.x = global_x;
+        msg.y = global_y;
+        //w celu sprawdzenia czy dane się odświeżają
+        msg.z = occupied;
+        pub_goal.publish(msg);
+        ros::spinOnce();
+    }
     return 0;
 }
