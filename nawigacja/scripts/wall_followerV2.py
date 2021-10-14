@@ -42,12 +42,11 @@ def position(pose):
     
     print("X position: {}".format(pos_x))
     print("Y position: {}".format(pos_y))
-    if(flaga == 0 and (t_actual>t+5.0)):
+    if(flaga == 0 and (t_actual>t+15.0)):
         print("Start point x:{} , y:{}".format(start_x,start_y))
         if(check(start_x,pos_x) and check(start_y,pos_y)):
             stop()
-            #print("Saving map...")
-            #os.system("rosrun map_server map_saver -f mymap")
+            #os.system("rosservice call /rtabmap/set_mode_localization")
             rospy.signal_shutdown(reason="Mapping finished")
     print("--------------------------------------------")
 

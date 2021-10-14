@@ -1,0 +1,17 @@
+<launch>
+
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_house.launch">
+        <arg name="model" value="waffle" />
+    </include>
+
+    <include file="$(find rtabmap_ros)/launch/demo/demo_turtlebot3_navigation.launch">
+        <arg name="model" value="waffle" />
+        <arg name="localization" value="false" />
+    </include>
+
+    <include file="$(find octomap_server)/launch/octomap_mapping.launch">
+
+    </include>
+
+
+</launch>

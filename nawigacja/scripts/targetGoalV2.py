@@ -3,43 +3,47 @@ import rospy
 import actionlib
 from geometry_msgs.msg import Point
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+import os
 
 class Navi:
     def __init__(self):
         rospy.init_node('movebase_client_py')
         self.point_sub = rospy.Subscriber("goal_xyz",Point,self.target)
-
+        self.flaga = 1
+        self.point = Point()
+        
     def target(self,msg):
-        self.x = msg.x
-        self.y = msg.y
-        print("x: {}".format(msg.x))
-        print("y: {}".format(msg.y))
+        self.point = msg
+
+    
+    def stop_program(self):
+        os.system("rosservice call /rtabmap/pause")
+        os.system("rosrun octomap_server octomap_saver saved_map.bt")
 
     def movebase_client(self):
-        client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-        client.wait_for_server()
-
-        goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
-        goal.target_pose.header.stamp = rospy.Time.now()
-        goal.target_pose.pose.position.x = self.x
-        goal.target_pose.pose.position.y = self.y
-        goal.target_pose.pose.orientation.w = 1.0
-
-        client.send_goal(goal)
-        wait = client.wait_for_result()
-        if not wait:
-            rospy.logerr("Action server not available!")
-            rospy.signal_shutdown("Action server not available!")
-        else:
-            return client.get_result()
+        while(not rospy.is_shutdown()):
+            client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+            client.wait_for_server()
+    
+            goal = MoveBaseGoal()
+            goal.target_pose.header.frame_id = "map"
+            goal.target_pose.header.stamp = rospy.Time.now()
+            goal.target_pose.pose.position.x = self.point.x
+            goal.target_pose.pose.position.y = self.point.y
+            goal.target_pose.pose.orientation.w = -1.0
+            
+            client.send_goal(goal)
+            print("Driving to goal: x:{0}, y:{1}".format(goal.target_pose.pose.position.x,goal.target_pose.pose.position.y))
+            if(client.wait_for_result()):
+                print("goal reached!")
+            else:
+                print("goal NOT reached")
+            client.cancel_all_goals()
+            #if(self.point.x == goal.target_pose.pose.position.x and self.point.y == goal.target_pose.pose.position.y):
+                #print("End of mapping!")
+                #rospy.is_shutdown()
+                #rospy.on_shutdown(self.stop_program())              
 
 if __name__ == '__main__':
-    try:
-        nawigacja = Navi()
- 
-        result = nawigacja.movebase_client()
-        if result:
-            rospy.loginfo("Goal execution done!")
-    except rospy.ROSInterruptException:
-        rospy.loginfo("Navigation test finished.")
+    nawigacja = Navi()
+    nawigacja.movebase_client()

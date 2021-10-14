@@ -30,6 +30,7 @@ def laser_values_test(msg):
     print('laser value of 225 degree: {}'.format(msg.ranges[225])) # 225 degrees
     print('laser value of 270 degree: {}'.format(msg.ranges[270])) # prawo
     print('laser value of 315 degree: {}'.format(msg.ranges[315])) # 315 degrees
+    print('0:30:{}'.format(min(min(msg.ranges[330:359]),10)))
 
 
 rospy.init_node('scan_values',anonymous=True)

@@ -41,22 +41,22 @@ class MoveRobot:
 
         vel_msg = Twist()
 #####################################################
-        while self.steering_angle(goal_pose) >=self.didistance_tolerance:
-                    vel_msg.linear.x = 0
-                    vel_msg.linear.y = 0
-                    vel_msg.linear.z = 0
+        #while self.steering_angle(goal_pose) != self.pose.pose.pose.orientation.z:
+                    #vel_msg.linear.x = 0
+                    #vel_msg.linear.y = 0
+                    #vel_msg.linear.z = 0
 
-                    vel_msg.angular.x = 0
-                    vel_msg.angular.y = 0
-                    vel_msg.angular.z = self.angular_vel(goal_pose)
+                   # vel_msg.angular.x = 0
+                    #vel_msg.angular.y = 0
+                   # vel_msg.angular.z = self.angular_vel(goal_pose)
 
-                    self.vel_pub.publish(vel_msg)
-                    self.rate.sleep()
+                   # self.vel_pub.publish(vel_msg)
+                   # self.rate.sleep()
 
-                    vel_msg.linear.x = 0
-                    vel_msg.angular.z = 0
-                    self.vel_pub.publish(vel_msg)
-        print("done")
+                    #vel_msg.linear.x = 0
+                   # vel_msg.angular.z = 0
+                    #self.vel_pub.publish(vel_msg)
+        #print("done")
 #########################################################   
         while self.euclidean_distance(goal_pose) >= self.didistance_tolerance:
             vel_msg.linear.x = self.linear_vel(goal_pose)
