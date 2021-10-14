@@ -17,7 +17,8 @@ using namespace octomap_msgs;
 
 double global_x;
 double global_y;
-int occupied = 0;
+double global_check_z = 0;
+
 class Mapa
 {
     public:
@@ -26,11 +27,15 @@ class Mapa
 };
 void Mapa::ChatterCallback(const octomap_msgs::Octomap &msg)
 {
-    //int occupied = 0;
+    std::cout<<"processing..."<<endl;
+    
     int free = 0;
+    int left = 0;
     int unknown = 0;
+    int unknownV2 = 0;
+    int occupied = 0;
     int flaga = 0;
-    bool check = true;
+    bool found_point = true;
     point3d min;
     point3d max;
     AbstractOcTree* tree = octomap_msgs::msgToMap(msg);
@@ -45,19 +50,21 @@ void Mapa::ChatterCallback(const octomap_msgs::Octomap &msg)
             
             for(OcTree::leaf_iterator it = octree->begin_leafs(),end = octree->end_leafs(); it!= end; ++it)
             {
-
+                
                 if(octree->isNodeOccupied(*it))
                 {
-                    
                     double i_x = it.getX();
                     double i_y = it.getY();
                     double i_z = it.getZ();
-
-
+                    if(fabs(i_z - 0.025)<0.0001)
+                    {
+                        occupied++;
+                    }
                     if(flaga == 0)
                     {
                         cout<<"x: "<<i_x<<endl;
                         cout<<"y: "<<i_y<<endl;
+                        cout<<"z: "<<i_z<<endl;
                     }
                     flaga = 1;
                     min.x() = i_x - 0.25;min.y() = i_y - 0.25;min.z() = 0.025;
@@ -72,45 +79,59 @@ void Mapa::ChatterCallback(const octomap_msgs::Octomap &msg)
                             {
                                 if(!octree->search(ix,iy,iz))
                                 {
-                                    if(check) unknown++;
-
+                                    unknown++;
+                                    unknownV2++;
+                                }
+                                if (found_point == false) break;
+                            }
+                            if(octree->search(ix,iy,0.05) != NULL)
+                            {
+                                if(octree->isNodeOccupied(octree->search(ix,iy,0.05)))
+                                {
+                                    global_check_z++;
                                 }
                             }
                         }
                     }
-                    if(check == true && unknown>50)
+
+
+
+
+                    if(found_point == true && unknown>10 && global_check_z == 0)
                     {
+                        found_point == false;
                         global_x = i_x;
                         global_y = i_y;
                         
                     }
-                    check = false;
-
-
+                    //check = false;
+                    unknown = 0;
+                    global_check_z = 0;
+                    
 
                     //std::cout<<" x = "<< it.getX()<<endl;
                     //std::cout<<" y = "<< it.getY()<<endl;
                     //std::cout<<" z = "<< it.getZ()<<endl;
                     //std::cout<<"---------------------------------------"<<endl;
-                    occupied++;
+                    //occupied++;
                     
                     
                 }
                 else
                 {
+                    
                     free++;
                     
                 }
-
-
                 
             }
             std::cout<<"Number of occupied cells = "<<occupied<<endl;
             std::cout<<"Number of Free cells: "<<free<<endl;
-            std::cout<<"Number of unknown cells: "<<unknown<<endl;
+
+
             cout<<"global_x: "<<global_x<<endl;
-            cout<<"global_y: "<<global_y<<endl;
-       } 
+            cout<<"global_y: "<<global_y<<endl;  
+        } 
 
     }
 
@@ -121,20 +142,22 @@ void Mapa::ChatterCallback(const octomap_msgs::Octomap &msg)
 
 int main (int argc, char **argv)
 {
-    Mapa map;
     ros::init(argc,argv, "sub3");
+    Mapa map;
     ros::NodeHandle n,nh;
-    ros::Subscriber sub = n.subscribe("/octomap_binary",1000,&Mapa::ChatterCallback,&map);
-    ros::Publisher pub_goal = nh.advertise<geometry_msgs::Point>("goal_xyz",1000);
+    ros::Subscriber sub = n.subscribe("/octomap_binary",1,&Mapa::ChatterCallback,&map);
+    ros::Publisher pub_goal = nh.advertise<geometry_msgs::Point>("goal_xyz",1);
     geometry_msgs::Point msg;
     while (ros::ok())
     {
         msg.x = global_x;
         msg.y = global_y;
+        
         //w celu sprawdzenia czy dane się odświeżają
-        msg.z = occupied;
-        pub_goal.publish(msg);
+        if(pub_goal.getNumSubscribers() > 0)
+            pub_goal.publish(msg);
         ros::spinOnce();
+ 
     }
     return 0;
 }
