@@ -4,6 +4,7 @@
   <xacro:include filename="$(find turtlebot3_description)/urdf/turtlebot3_burger.gazebo.xacro"/>
 
   <link name="base_footprint"/>
+  <link name="camera_link"/>
 
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
@@ -161,5 +162,11 @@
                izz="0.001" />
     </inertial>
   </link>
+
+  <joint name="camera_joint" type="fixed">
+    <origin xyz="0.032 0 0.141" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+  </joint>
 
 </robot>
