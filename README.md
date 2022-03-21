@@ -2,7 +2,7 @@
 
 Uruchomić robota a następnie odpalić następujące skrypty w terminalach.
 
-1. vidia Jetson Nano
+1. Nvidia Jetson Nano
 
 roslaunch turtlebot3_bringup turtlebot3_robot.launch
 
