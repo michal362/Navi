@@ -1,0 +1,16 @@
+obstacle_range: 3.0
+raytrace_range: 3.5
+
+#footprint: [[-0.205, -0.155], [-0.205, 0.155], [0.077, 0.155], [0.077, -0.155]] dla waffle
+footprint: [[-0.105, -0.105], [-0.105, 0.105], [0.041, 0.105], [0.041, -0.105]]
+#robot_radius: 0.17
+map_topic: /map
+subscribe_to_updates: true
+global_frame: map
+robot_base_frame: base_footprint
+always_send_full_costmap: true
+inflation_radius: 0.3
+#cost_scaling_factor: 2.58
+observation_sources: scan 
+scan: {sensor_frame: base_scan, data_type: LaserScan, topic: scan, marking: true, clearing: true}
+obstacle_layer: {track_unknown_space: false}
